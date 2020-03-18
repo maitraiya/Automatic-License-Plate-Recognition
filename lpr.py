@@ -7,7 +7,7 @@ from flask import Flask,jsonify,request
 import os
 from datetime import date
 
-pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+# pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
 app=Flask(__name__)
 
@@ -87,7 +87,7 @@ def getText():
 @app.route('/',methods=['GET','POST'])
 def welcome():
  today = date.today()
- return jsonify(text='Hello its {}'.format(today))
+ return jsonify(text='Hello its {}'.format(today)),200
 
 if __name__ == '__main__':
    app.run(debug = True)
