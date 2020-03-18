@@ -70,14 +70,14 @@ def getContour():
    os.remove('input.jpg')
   if os.path.isfile('Cropped.jpg'):
    os.remove('Cropped.jpg')
-  return jsonify(text=text)
+  return jsonify(text=text),200
 
  except:
   if os.path.isfile('input.jpg'):
    os.remove('input.jpg')
   if os.path.isfile('Cropped.jpg'):
    os.remove('Cropped.jpg')
-  return jsonify(error='Please upload the correct image')
+  return jsonify(text='Please upload the correct image'),400
 
 def getText():
  #Read the number plate
