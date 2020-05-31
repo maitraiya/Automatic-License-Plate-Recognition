@@ -6,18 +6,24 @@ import pytesseract
 from flask import Flask,jsonify,request
 import os
 from datetime import date
+from pymongo import MongoClient
 
-# pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+#pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+
+client = MongoClient('mongodb+srv://maitraiya:maitraiya@cluster0-2ncml.mongodb.net/test?retryWrites=true&w=majority')
+client .test
+db = client['ALPR']
+licensePlateDetails = db['licensePlateDetails']
+print('Connection Established Successfully')
 
 app=Flask(__name__)
 
-@app.route('/api/getText', methods=['POST'])
+@app.route('/api/getLicenseNo', methods=['POST'])
 def getContour():
  try:
   f = request.files['file']
   f.save('input.jpg')
   img = cv2.imread('input.jpg', cv2.IMREAD_COLOR)
-
   img = cv2.resize(img, (620, 480))
 
   gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # convert to grey scale
@@ -65,6 +71,7 @@ def getContour():
   cv2.imwrite('Cropped.jpg', Cropped)
   cv2.waitKey(0)
   cv2.destroyAllWindows()
+
   text = getText();
   if os.path.isfile('input.jpg'):
    os.remove('input.jpg')
@@ -83,6 +90,24 @@ def getText():
  #Read the number plate
  text =  pytesseract.image_to_string(Image.open('Cropped.jpg'),lang='eng',config='--psm 6')
  return text
+
+@app.route('/api/getDetails',methods=['POST'])
+def getDetails():
+ try:
+  req = request.get_json()
+  text = req['license']
+  if(len(text.strip())>0):
+   text = ''.join(e for e in text if e.isalnum())
+   print(text)
+   acc = licensePlateDetails.find_one({"licenseNo":{"$regex" : ".*"+text+".*"}})
+   if(acc and len(acc)>0):
+    return jsonify(text=acc['name']),200
+   else:
+    return jsonify(text='No Data Foundd'),404
+  else:
+   return jsonify(text='No Data Found'),404      
+ except:
+  return jsonify(text='Internal Server Error'),500
 
 @app.route('/',methods=['GET','POST'])
 def welcome():
